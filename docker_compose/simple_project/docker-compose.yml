@@ -1,0 +1,26 @@
+version: '3'
+services:
+  service:
+    build: app
+    expose:
+      - "8000"
+    env_file:
+      - ./.env
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./configs:/etc/nginx/conf.d:ro
+    depends_on:
+      - service
+    ports:
+      - "80:80"
+
+  theatre-db:
+#    Тут необходимо описать недостающие элементы
+    volumes:
+      - ./database_dump.sql:/docker-entrypoint-initdb.d/init.sql
+
+
+
