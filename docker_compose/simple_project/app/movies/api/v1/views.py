@@ -12,9 +12,9 @@ class MoviesApiMixin:
     model = FilmWork
     http_method_names = ['get']
 
-    # def get_queryset() возращает подготовленный QuerySet, где: 
+    # def get_queryset() возращает подготовленный QuerySet, где:
     # annotate -  добавляет к полям модели дополнительные значения
-    # Postgres-функция ArrayAgg собирает в список все значения, которые есть у поля
+    # Postgres-функция ArrayAgg собирает в список все значения поля
     # метод values превращает QuerySet в словарь
     def get_queryset(self):
         return (
@@ -51,12 +51,19 @@ class MoviesListApi(MoviesApiMixin, BaseListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         queryset = self.get_queryset()
-        paginator, page, queryset, is_paginated = self.paginate_queryset(queryset, self.paginate_by)
+        paginator, page, queryset, is_paginated = self.paginate_queryset(
+            queryset,
+            self.paginate_by
+        )
 
         context = {
             'count': paginator.count,
             'total_pages': paginator.num_pages,
-            'prev': page.previous_page_number() if page.has_previous() else None,
+            'prev': (
+                page.previous_page_number()
+                if page.has_previous()
+                else None
+            ),
             'next': page.next_page_number() if page.has_next() else None,
             'results': list(queryset),
         }
