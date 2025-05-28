@@ -2,12 +2,10 @@ version: '3'
 services:
   service:
     build: app
+    # Миграции перенесены в entrypoint.sh
     command: >
-      /bin/bash -c "
-      python manage.py migrate &&
-      python manage.py collectstatic --no-input &&
+      /app/entrypoints.sh
       gunicorn example.wsgi:application --bind 0.0.0.0:8000
-      "
     # expose:
     #   - "8000"
     ports:
