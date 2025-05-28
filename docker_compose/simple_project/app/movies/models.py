@@ -117,6 +117,7 @@ class GenreFilmWork(UUIDMixin):
         ]
 
 
+# Для исключения "хардкода" ролей пользователей в фильме в views
 class Roles(models.TextChoices):
     ACTOR = 'actor', _('actor')
     DIRECTOR = 'director', _('director')

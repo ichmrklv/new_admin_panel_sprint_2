@@ -4,7 +4,7 @@ from django.views.generic.detail import BaseDetailView
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.db.models import Q
 
-from movies.models import FilmWork
+from movies.models import FilmWork, Roles
 
 
 # Общее поведение для всех API (QuerySet + JsonResponse)
@@ -14,32 +14,26 @@ class MoviesApiMixin:
 
     # def get_queryset() возращает подготовленный QuerySet, где:
     # annotate -  добавляет к полям модели дополнительные значения
+    # for role in Roles для избежания "хардкода" ролей 
     # Postgres-функция ArrayAgg собирает в список все значения поля
     # метод values превращает QuerySet в словарь
     def get_queryset(self):
-        return (
-            FilmWork.objects.values(
-                'id', 'title', 'description', 'creation_date', 'rating', 'type'
-            ).annotate(
-                genres=ArrayAgg('genres__name', distinct=True),
-                # для тестов persons разделяется
-                actors=ArrayAgg(
-                    'persons__full_name',
-                    filter=Q(personfilmwork__role='actor'),
-                    distinct=True
-                ),
-                directors=ArrayAgg(
-                    'persons__full_name',
-                    filter=Q(personfilmwork__role='director'),
-                    distinct=True
-                ),
-                writers=ArrayAgg(
-                    'persons__full_name',
-                    filter=Q(personfilmwork__role='writer'),
-                    distinct=True
-                ),
-            )
+        base_query = FilmWork.objects.values(
+            'id', 'title', 'description', 'creation_date', 'rating', 'type'
+        ).annotate(
+            genres=ArrayAgg('genres__name', distinct=True)
         )
+
+        for role in Roles:
+            base_query = base_query.annotate(**{
+                f"{role.value}s": ArrayAgg(
+                    'persons__full_name',
+                    filter=Q(personfilmwork__role=role.value),
+                    distinct=True
+                )
+            })
+
+        return base_query
 
     def render_to_response(self, context, **response_kwargs):
         return JsonResponse(context)
