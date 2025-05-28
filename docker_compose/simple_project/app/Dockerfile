@@ -6,6 +6,9 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_SETTINGS_MODULE=example.settings
 
+# Установка netcat (чтобы entrypoint.sh мог проверить запуск БД)
+RUN apt-get update && apt-get install -y netcat && apt-get clean
+
 COPY requirements.txt requirements.txt
 
 # hadolint ignore=DL3013 
